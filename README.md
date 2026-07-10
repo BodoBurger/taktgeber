@@ -46,6 +46,25 @@ Variables:
 
 The SQL creates `workouts` and `exercises` tables with Row Level Security policies. The app uses soft deletes through `deleted_at` so offline deletes can sync safely.
 
+## Deploy to GitHub Pages
+
+Production builds are configured for the repository URL:
+
+```text
+https://bodoburger.github.io/taktgeber/
+```
+
+To enable deployment and Supabase sync:
+
+1. In the GitHub repository, open **Settings → Pages** and select **GitHub Actions** as the source.
+2. Open **Settings → Secrets and variables → Actions** and create these repository secrets:
+   - `VITE_SUPABASE_URL`: your Supabase project URL.
+   - `VITE_SUPABASE_ANON_KEY`: your Supabase anonymous public key. Do not use a service-role key.
+3. In Supabase, open **Authentication → URL Configuration** and set the Site URL to `https://bodoburger.github.io/taktgeber/`. Add the same URL to the redirect allow list.
+4. Push to `main`, or run **Deploy to GitHub Pages** manually from the repository's **Actions** tab.
+
+The workflow in `.github/workflows/deploy-pages.yml` builds and deploys `dist`. Although the anonymous key is supplied through a GitHub secret, Vite embeds it in the browser bundle by design; data access is protected by the Row Level Security policies in `supabase/schema.sql`.
+
 ## Local-First Sync
 
 Workouts are always written to IndexedDB first. Local rows include `sync_status`:
