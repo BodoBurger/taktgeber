@@ -15,66 +15,122 @@ export class BrowserClock {
 
 export type Sound = "soft" | "bright" | "wood";
 export type Cue = "countdown" | "change" | "finish";
+
+const SAMPLE_RATE = 22_050;
+
+function wavUrl(cue?: Cue, sound: Sound = "soft") {
+  const notes = cue
+    ? cue === "finish"
+      ? [1, 1.25, 1.5]
+      : cue === "change"
+        ? [1, 1.5]
+        : [1]
+    : [];
+  const duration = cue ? (notes.length - 1) * 0.16 + 0.15 : 0.02;
+  const samples = Math.ceil(duration * SAMPLE_RATE);
+  const bytes = new ArrayBuffer(44 + samples * 2);
+  const view = new DataView(bytes);
+  const text = (offset: number, value: string) => {
+    for (let i = 0; i < value.length; i++)
+      view.setUint8(offset + i, value.charCodeAt(i));
+  };
+  text(0, "RIFF");
+  view.setUint32(4, 36 + samples * 2, true);
+  text(8, "WAVEfmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, SAMPLE_RATE, true);
+  view.setUint32(28, SAMPLE_RATE * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  text(36, "data");
+  view.setUint32(40, samples * 2, true);
+
+  const base = sound === "soft" ? 520 : sound === "bright" ? 880 : 240;
+  for (let i = 0; i < samples; i++) {
+    const at = i / SAMPLE_RATE;
+    const note = Math.floor(at / 0.16);
+    const elapsed = at - note * 0.16;
+    let value = 0;
+    if (notes[note] && elapsed < 0.15) {
+      const phase = 2 * Math.PI * base * notes[note] * elapsed;
+      const wave =
+        sound === "wood"
+          ? (2 / Math.PI) * Math.asin(Math.sin(phase))
+          : Math.sin(phase);
+      const envelope =
+        elapsed < 0.008 ? elapsed / 0.008 : Math.exp(-38 * (elapsed - 0.008));
+      value = wave * envelope * 0.9;
+    }
+    view.setInt16(44 + i * 2, Math.round(value * 0x7fff), true);
+  }
+  return URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
+}
+
 export class BrowserAudio {
-  private context: AudioContext | null = null;
-  private voices = new Set<OscillatorNode>();
+  private readonly element = new Audio();
+  private readonly urls = new Map<string, string>();
+  private enabled = false;
+
+  private url(cue?: Cue, sound: Sound = "soft") {
+    const key = cue ? `${sound}-${cue}` : "silence";
+    let url = this.urls.get(key);
+    if (!url) {
+      url = wavUrl(cue, sound);
+      this.urls.set(key, url);
+    }
+    return url;
+  }
+
   async unlock() {
     const nav = navigator as Navigator & { audioSession?: { type: string } };
     if (nav.audioSession) nav.audioSession.type = "ambient";
-    this.context ??= new AudioContext();
-    if (this.context.state !== "running") {
+    if (this.enabled) return;
+    this.element.src = this.url();
+    this.element.volume = 1;
+    let timeout = 0;
+    try {
       await Promise.race([
-        this.context.resume(),
-        new Promise<never>((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Tap Test sound to enable audio.")),
-            2000,
-          ),
+        this.element.play(),
+        new Promise<never>(
+          (_, reject) =>
+            (timeout = window.setTimeout(() => {
+              this.element.pause();
+              reject(new Error("Tap Test sound to enable audio."));
+            }, 2000)),
         ),
       ]);
+      this.element.pause();
+      this.element.currentTime = 0;
+      this.enabled = true;
+    } catch (error) {
+      this.enabled = false;
+      throw error;
+    } finally {
+      clearTimeout(timeout);
     }
-    if (this.context.state !== "running")
-      throw new Error("Audio is unavailable. Tap Test sound to retry.");
   }
   get state() {
-    return this.context?.state ?? "not enabled";
+    return this.enabled ? "running" : "not enabled";
   }
-  play(cue: Cue, sound: Sound, volume: number) {
-    const ctx = this.context;
-    if (!ctx || ctx.state !== "running") return false;
-    const base = sound === "soft" ? 520 : sound === "bright" ? 880 : 240;
-    const notes =
-      cue === "finish" ? [1, 1.25, 1.5] : cue === "change" ? [1, 1.5] : [1];
-    notes.forEach((ratio, index) => {
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const at = ctx.currentTime + index * 0.16;
-      oscillator.type = sound === "wood" ? "triangle" : "sine";
-      oscillator.frequency.value = base * ratio;
-      gain.gain.setValueAtTime(0, at);
-      gain.gain.linearRampToValueAtTime(volume * 0.25, at + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.001, at + 0.13);
-      oscillator.connect(gain);
-      gain.connect(ctx.destination);
-      this.voices.add(oscillator);
-      oscillator.onended = () => {
-        oscillator.disconnect();
-        gain.disconnect();
-        this.voices.delete(oscillator);
-      };
-      oscillator.start(at);
-      oscillator.stop(at + 0.15);
-    });
-    return true;
+  async play(cue: Cue, sound: Sound, volume: number) {
+    if (!this.enabled) return false;
+    this.element.pause();
+    this.element.src = this.url(cue, sound);
+    this.element.currentTime = 0;
+    this.element.volume = volume;
+    try {
+      await this.element.play();
+      return true;
+    } catch {
+      this.enabled = false;
+      return false;
+    }
   }
   silence() {
-    for (const voice of this.voices) {
-      try {
-        voice.stop();
-      } catch {
-        /* Already ended. */
-      }
-    }
+    this.element.pause();
+    this.element.currentTime = 0;
   }
 }
 

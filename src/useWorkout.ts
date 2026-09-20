@@ -85,8 +85,13 @@ export function useWorkout() {
     const prefs = ref.current?.preferences;
     if (!prefs || document.hidden) return;
     if (!prefs.muted && prefs.volume > 0) {
-      if (!audio.current.play(kind, prefs.sound, prefs.volume))
-        setError("Sound is not ready. Tap Test sound to enable it.");
+      void audio.current
+        .play(kind, prefs.sound, prefs.volume)
+        .then((played) => {
+          setAudioState(audio.current.state);
+          if (!played)
+            setError("Sound is not ready. Tap Test sound to enable it.");
+        });
     }
     if (prefs.vibration && "vibrate" in navigator)
       navigator.vibrate(kind === "finish" ? [80, 60, 80] : 50);
