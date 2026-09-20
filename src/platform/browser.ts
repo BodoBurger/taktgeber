@@ -85,7 +85,7 @@ export class BrowserAudio {
 
   async unlock() {
     const nav = navigator as Navigator & { audioSession?: { type: string } };
-    if (nav.audioSession) nav.audioSession.type = "ambient";
+    if (nav.audioSession) nav.audioSession.type = "transient";
     if (this.enabled) return;
     this.element.src = this.url();
     this.element.volume = 1;

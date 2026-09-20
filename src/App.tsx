@@ -758,7 +758,7 @@ export default function App() {
                   <dt>Audio mixing hint</dt>
                   <dd>
                     {"audioSession" in navigator
-                      ? "Ambient supported"
+                      ? "Short cues can mix"
                       : "Managed by browser"}
                   </dd>
                 </div>

@@ -11,9 +11,11 @@ class FakeAudio {
 
 describe("browser audio", () => {
   let audio: FakeAudio;
+  let audioSession: { type: string };
 
   beforeEach(() => {
     audio = new FakeAudio();
+    audioSession = { type: "auto" };
     vi.stubGlobal(
       "Audio",
       class {
@@ -22,7 +24,7 @@ describe("browser audio", () => {
         }
       },
     );
-    vi.stubGlobal("navigator", {});
+    vi.stubGlobal("navigator", { audioSession });
     vi.stubGlobal("window", globalThis);
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:cue");
   });
@@ -40,6 +42,7 @@ describe("browser audio", () => {
     expect(audio.play).toHaveBeenCalledOnce();
     expect(audio.src).toBe("blob:cue");
     await unlocking;
+    expect(audioSession.type).toBe("transient");
     expect(audio.pause).toHaveBeenCalledOnce();
     expect(service.state).toBe("running");
   });

@@ -31,7 +31,7 @@ For an iPhone, serve `dist/` from a **trusted HTTPS origin**, then open it in Sa
 - Optional actual reps, dumbbell weight, and session notes. Skipped sets are excluded from completed history.
 - IndexedDB persistence for the active session, settings, and history; JSON export.
 - Three synthesized sound themes with different countdown, transition, and finish cues, volume, mute, and optional supported vibration.
-- Wake-lock status, ambient audio-session hint where available, and an in-app device checklist/event export.
+- Wake-lock status, transient audio-session hint where available, and an in-app device checklist/event export.
 - Responsive layout, native keyboard-operable controls, and an installable/offline production build.
 
 This is the feasibility prototype, not the complete v1. Workout-library editing, editable reusable instructions, history-result editing beyond recovery confirmation, JSON import, Supabase login, and cloud synchronization are still planned. Manual rep/weight inputs are saved when Done is tapped; exercise notes save as entered. No user data is transmitted to a server.
@@ -40,7 +40,7 @@ This is the feasibility prototype, not the complete v1. Workout-library editing,
 
 The domain engine uses explicit deadlines. During visible execution the browser clock uses a monotonic anchor; on return it reconciles with wall time. If wall time has moved backward relative to the saved/hidden checkpoint, the workout pauses with a notice. Forward clock changes while hidden cannot be distinguished from elapsed real time. Active duration excludes explicit pauses and includes time spent in the background.
 
-iOS can suspend a PWA in the background. Screen-off sounds are not guaranteed, and missed cues are not replayed. Wake lock is a request that the system can release. The audio implementation requests ambient mixing when supported, but **music/podcast coexistence and real iPhone wake-lock behavior still require hardware testing**. Vibration is unavailable in iOS Safari. See [the iPhone checklist](docs/prototype-checklist.md).
+iOS can suspend a PWA in the background. Screen-off sounds are not guaranteed, and missed cues are not replayed. Wake lock is a request that the system can release. The audio implementation identifies cues as transient so they can mix with other apps when Safari supports the Audio Session API, but **music/podcast coexistence and real iPhone wake-lock behavior still require hardware testing**. Vibration is unavailable in iOS Safari. See [the iPhone checklist](docs/prototype-checklist.md).
 
 Browser data may be cleared or evicted. The prototype requests persistent storage where available and provides JSON export. It does not reset existing data if loading or validation fails. Development formats are subject to the hard-cut policy in [AGENTS.md](AGENTS.md).
 
