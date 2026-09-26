@@ -1,6 +1,6 @@
 # Taktgeber app plan
 
-Status: feasibility prototype implemented locally; physical iOS 26 validation pending. See `README.md` for the implemented subset and `docs/prototype-checklist.md` for device checks. The full v1 scope below remains the product plan.
+Status: feasibility prototype completed. Sound, screen awake, and coexistence with external music/podcasts were confirmed by the user in the PWA on iOS 27. See `README.md` for the implemented subset and `docs/prototype-checklist.md` for the feasibility result and remaining release checks. The full v1 scope below remains the product plan.
 
 ## Development policy
 
@@ -35,7 +35,7 @@ The user accepts correcting timing when returning to the app. Proposed v1 behavi
 
 Standard vibration is unavailable in iOS Safari. Show vibration controls only where supported. Native capabilities may be added later through Capacitor plugins, but wrapping the app alone does not resolve background execution restrictions.
 
-Audio coexistence is a requirement to test on real iPhones, both in Safari and as an installed PWA. Use short cues initialized by the Start gesture, and test interruption/recovery with music, podcasts, headphones, and screen locking. Do not promise background cues or uninterrupted external playback before this validation. If browser behavior prevents the desired experience, resolve the tradeoff before building out the app.
+Short cues are initialized by the Start gesture. The user confirmed foreground sound, screen awake, and coexistence with external music/podcasts on an iOS 27 PWA, which closes the feasibility stage. Recheck audio routing and interruption/recovery in Safari and the installed PWA, with headphones, the phone speaker, and screen locking before release. Background cues remain unsupported when iOS suspends the app.
 
 References:
 
@@ -133,7 +133,7 @@ Export JSON containing a schema version, export timestamp, workout definitions, 
 
 ## Delivery sequence and acceptance
 
-1. **iPhone feasibility prototype:** validate wake lock, short cues alongside external music/podcasts, app switching, screen locking, and timestamp recovery in Safari and installed mode. Timing reconciliation on return is accepted; evaluate audio coexistence and foreground cues on actual devices.
+1. **iPhone feasibility prototype — complete:** on an iOS 27 PWA, the user confirmed wake lock, foreground cues, and coexistence with external music/podcasts. Timing reconciliation on return is accepted. Broader device and browser checks remain part of v1 release verification.
 2. **Workout and session engine:** implement timed/manual steps, sets, rounds, rest placement, pause/resume, skip, and finish. Verify deterministic transitions with controlled-clock tests, including long suspension and manual boundaries.
 3. **Local application:** implement library, editor, workout screen, results/history, notes, optional weights, sounds, and JSON portability. Verify that skipped work never appears as completed and editing a workout preserves history.
 4. **Accounts and synchronization:** add email OTP, ownership policies, local persistence by account, queued synchronization, retry protection, and conflict handling. Test isolation between two users and duplicate-free retry behavior.

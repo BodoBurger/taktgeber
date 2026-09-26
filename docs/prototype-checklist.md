@@ -1,10 +1,10 @@
-# iOS 26 prototype check
+# Prototype feasibility result
 
-Status: real-device tests pending. Automated Chromium checks cover the timer flow, persistence, offline history, and mobile layout; they cannot validate iOS audio routing or physical wake behavior.
+Status: **closed**. The PWA is viable for the basic iPhone requirements. On an iOS 27 device, the user confirmed that sound cues play, Keep screen awake works, and external music/podcasts continue playing during a workout. The device-check export recorded audio as `running`, wake lock as `active`, and lifecycle events including a return that reconciled elapsed steps. These diagnostics support the report but do not independently measure audible output or screen behavior.
 
-Run this checklist in both Safari and the installed Home Screen app using a trusted HTTPS origin. Use the production build. In Device check, wait for “Offline app shell: Ready” before testing offline startup.
+The feasibility decision is to continue with the PWA. iOS may still suspend it when hidden or locked; missed sounds are not replayed, and the timer reconciles on return. The following scenarios remain useful for v1 release verification, including Safari, the installed Home Screen app, the minimum supported iOS version, different audio outputs, and desktop browsers. They are no longer a gate for continuing product development.
 
-| Check | Steps | Expected result |
+| Release check | Steps | Expected result |
 | --- | --- | --- |
 | Short circuit | Set work/rest to 5 seconds, one set and one round. Start. | Five-second preparation; squats; rest; rows waiting for Done; rest; plank; finish. No final rest. |
 | Sounds | Test all three sound choices; start with countdown enabled. | Distinct countdown, change, and finish patterns. No burst of stale cues after returning. |
@@ -19,4 +19,4 @@ Run this checklist in both Safari and the installed Home Screen app using a trus
 | Export | Export history and the device check. | JSON files are saved/shared through the browser and contain the expected data. |
 | Layout | Use portrait/landscape and focus numeric/note fields. | No clipped controls, horizontal scrolling, or automatic input zoom. |
 
-Record the device model, exact iOS version, Safari vs installed mode, audio output, silent-mode setting, and outcome. Device check can export recent lifecycle events to accompany a report. Firefox, Chrome, and Safari desktop checks should also be recorded before the full v1 release.
+For release checks, record the device model, exact iOS version, Safari vs installed mode, audio output, silent-mode setting, and outcome. Device check can export recent lifecycle events to accompany a report. Firefox, Chrome, and Safari desktop checks should also be recorded before the full v1 release.
