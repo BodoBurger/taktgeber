@@ -2,6 +2,29 @@
 
 These are ideas to explore, not confirmed requirements or a commitment to implement them together. The confirmed product direction remains in [app-plan.md](app-plan.md). Keep ideas here until their behavior and priority are decided; then update the app plan and any affected implementation together.
 
+## Data model
+
+- Exercise: specification and description of a specific exercise
+- Execution: recorded exercise
+- Workout: collection of exercises
+- Session: collection of executions
+    - can be started based on a workout or blank (user adds exercises on-the-fly)
+    - user can rearrange unfinished exercises
+
+## User interface
+
+- Active session 
+    - session view: list of completed executions and list of uncompleted, rearrangable exercises
+- Active exercise 
+    - mode: weight & repitition, timer, stop watch
+    - go to next exercise
+    - go back to session view
+
+## Workouts
+
+- auto-forward mode: goes to next exercise after it is finished (timer went down or user manually completes exercise)
+
+
 ## Exercise organization
 
 - Add a category system for exercises. Tags may be a good fit because an exercise can belong to several categories at once.
