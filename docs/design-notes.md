@@ -17,6 +17,7 @@ These are ideas to explore, not confirmed requirements or a commitment to implem
     - session view: list of completed executions and list of uncompleted, rearrangable exercises
 - Active exercise 
     - mode: weight & repitition, timer, stop watch
+    - show last execution of exercise as reference 
     - go to next exercise
     - go back to session view
 
